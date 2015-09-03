@@ -15,14 +15,14 @@ pub struct Scanner {
 }
 
 impl Scanner {
-    fn new(input: &str) -> Scanner {
+    pub fn new(input: &str) -> Scanner {
         Scanner{
             input: input.to_string(),
             output: Vec::new(),
         }
     }
 
-    fn scan(&mut self) {
+    pub fn scan(&mut self) {
         for character in self.input.chars() {
             match character {
                 i @ '0'...'9'   => self.output.push(format!("Integer digit: {}", i)),
@@ -40,5 +40,9 @@ impl Scanner {
                 z @ _           => self.output.push(format!("Unrecognized token: {}", z))
             }
         }
+    }
+
+    pub fn output(&self) -> &Vec<String> {
+        &self.output
     }
 }
