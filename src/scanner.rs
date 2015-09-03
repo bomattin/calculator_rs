@@ -36,7 +36,7 @@ impl Scanner {
                 ';'             => self.output.push("Statement terminator: ;".to_string()),
                 c @ 'a'...'z'| c @ 'A'...'Z'
                                 => self.output.push(format!("Variable name: {}", c)),
-                ' '             => self.output.push("Space, ignoring.".to_string())
+                ' '             => self.output.push("Space, ignoring.".to_string()),
                 z @ _           => self.output.push(format!("Unrecognized token: {}", z))
             }
         }
