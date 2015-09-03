@@ -1,0 +1,6 @@
+[package]
+name = "calculator_rs"
+version = "0.1.0"
+authors = ["bomattin <bomattin@butler.edu>"]
+
+[dependencies]
