@@ -11,7 +11,16 @@
 
 pub struct Scanner {
     input: String,
-    output: Vec<String>
+    output: Vec<String>,
+    state: ScannerState,
+}
+
+enum ScannerState {
+    Idle,
+    CharMode,
+    IntMode,
+    QuitMode,
+    Done,
 }
 
 impl Scanner {
@@ -19,10 +28,12 @@ impl Scanner {
         Scanner{
             input: input.to_string(),
             output: Vec::new(),
+            state: ScannerState::Idle,
         }
     }
 
     pub fn scan(&mut self) {
+        self.state = ScannerState::CharMode;
         for character in self.input.chars() {
             match character {
                 i @ '0'...'9'   => self.output.push(format!("Integer digit: {}", i)),
