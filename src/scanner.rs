@@ -62,28 +62,34 @@ impl Scanner {
                 '^' => Some(Token::Exponent),
                 '=' => Some(Token::Assignment),
                 ';' => Some(Token::Terminator),
-                ' ' => None(),
+                ' ' => None,
                 'q' => {
                     let mut proceed = match chars.peek() {
                         Some(&next) if next == 'u' => true,
                         _   => false
                     };
-                    if !proceed {return Some(Token::Variable(c));}
-                    chars.next();
-                    proceed = match chars.peek() {
-                        Some(&next) if next == 'i' => true,
-                        _   => false
-                    };
-                    if !proceed {Some(Token::Variable(c))}
-                    chars.next();
-                    proceed = match chars.peek() {
-                        Some(&next) if next == 't' => true,
-                        _   => false
-                    };
-                    if !proceed {Some(Token::Variable(c))}
-                    else {
+                    if !proceed {
+                        Some(Token::Variable(c))
+                    } else {
                         chars.next();
-                        Some(Token::Quit)
+                        proceed = match chars.peek() {
+                            Some(&next) if next == 'i' => true,
+                            _   => false
+                        };
+                        if !proceed {
+                            Some(Token::Variable(c))
+                        } else {
+                            chars.next();
+                            proceed = match chars.peek() {
+                                Some(&next) if next == 't' => true,
+                                _   => false
+                            };
+                            if !proceed {Some(Token::Variable(c))}
+                            else {
+                                chars.next();
+                                Some(Token::Quit)
+                            }
+                        }
                     }
                 },
                 'a'...'z' => Some(Token::Variable(c)),
