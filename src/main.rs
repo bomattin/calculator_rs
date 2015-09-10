@@ -7,6 +7,6 @@ fn main() {
     let mut s = Scanner::new(program);
     s.scan();
     for line in s.output() {
-        println!("{}",line);
+        println!("{:?}",line);
     }
 }

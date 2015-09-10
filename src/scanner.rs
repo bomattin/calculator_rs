@@ -11,16 +11,33 @@
 
 pub struct Scanner {
     input: String,
-    output: Vec<String>,
+    output: Vec<Token>,
     state: ScannerState,
 }
 
+#[derive(Debug, Eq, PartialEq)]
 enum ScannerState {
     Idle,
     CharMode,
     IntMode,
     QuitMode,
     Done,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+enum Token {
+    Integer(i64),
+    Addition,
+    Subtraction,
+    Multiplication,
+    Division,
+    Modulus,
+    Exponent,
+    Assignment,
+    Terminator,
+    Quit,
+    Variable(char),
+    Unknown(char),
 }
 
 impl Scanner {
@@ -34,26 +51,67 @@ impl Scanner {
 
     pub fn scan(&mut self) {
         self.state = ScannerState::CharMode;
-        for character in self.input.chars() {
-            match character {
-                i @ '0'...'9'   => self.output.push(format!("Integer digit: {}", i)),
-                '+'             => self.output.push("Addition operator: +".to_string()),
-                '-'             => self.output.push("Subtraction operator: -".to_string()),
-                '*'             => self.output.push("Multiplication operator: *".to_string()),
-                '/'             => self.output.push("Division operator: /".to_string()),
-                '%'             => self.output.push("Modulus operator: %".to_string()),
-                '^'             => self.output.push("Exponent operator: ^".to_string()),
-                '='             => self.output.push("Assignment operator: =".to_string()),
-                ';'             => self.output.push("Statement terminator: ;".to_string()),
-                c @ 'a'...'z'| c @ 'A'...'Z'
-                                => self.output.push(format!("Variable name: {}", c)),
-                ' '             => self.output.push("Space, ignoring.".to_string()),
-                z @ _           => self.output.push(format!("Unrecognized token: {}", z))
+        let mut chars = self.input.chars().peekable();
+        while let Some(c) = chars.next() {
+            let tok: Option<Token> = match c {
+                '+' => Some(Token::Addition),
+                '-' => Some(Token::Subtraction),
+                '*' => Some(Token::Multiplication),
+                '/' => Some(Token::Division),
+                '%' => Some(Token::Modulus),
+                '^' => Some(Token::Exponent),
+                '=' => Some(Token::Assignment),
+                ';' => Some(Token::Terminator),
+                ' ' => None(),
+                'q' => {
+                    let mut proceed = match chars.peek() {
+                        Some(&next) if next == 'u' => true,
+                        _   => false
+                    };
+                    if !proceed {return Some(Token::Variable(c));}
+                    chars.next();
+                    proceed = match chars.peek() {
+                        Some(&next) if next == 'i' => true,
+                        _   => false
+                    };
+                    if !proceed {Some(Token::Variable(c))}
+                    chars.next();
+                    proceed = match chars.peek() {
+                        Some(&next) if next == 't' => true,
+                        _   => false
+                    };
+                    if !proceed {Some(Token::Variable(c))}
+                    else {
+                        chars.next();
+                        Some(Token::Quit)
+                    }
+                },
+                'a'...'z' => Some(Token::Variable(c)),
+                '0'...'9' => {
+                    let mut number = 0;
+                    let mut current = c;
+                    loop {
+                        number *= 10;
+                        number += ((current as u8) - ('0' as u8)) as i64;
+                        match chars.peek() {
+                            Some(&next) if '0' <= next && next <= '9' => {
+                                current = next;
+                                chars.next();
+                            }
+                            _ => break,
+                        };
+                    }
+                    Some(Token::Integer(number))
+                },
+                _ => Some(Token::Unknown(c))
+            };
+            if tok.is_some() {
+                self.output.push(tok.unwrap());
             }
         }
     }
 
-    pub fn output(&self) -> &Vec<String> {
+    pub fn output(&self) -> &Vec<Token> {
         &self.output
     }
 }
